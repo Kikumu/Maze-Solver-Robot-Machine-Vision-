@@ -124,7 +124,7 @@ def draw_lines(img):
 			count=count+1	
 	return img
 
-	
+#initialise camera	
 camera = PiCamera()
 camera.resolution = (640,480)
 camera.vflip = True
@@ -132,16 +132,32 @@ camera.framerate = 20
 rawCapture = PiRGBArray(camera, size = (640,480))
 time.sleep(0.1)
 
+#process image
+h_img = cv2.imread("/home/pi/part2.jpg", cv2.IMREAD_GRAYSCALE)  # queryiamge
+sift = cv2.xfeatures2d.SIFT_create()
+kp_image, desc_image = sift.detectAndCompute(h_img, None)
+index_params = dict(algorithm=0, trees=5)
+search_params = dict()
+flann = cv2.FlannBasedMatcher(index_params, search_params)
+
+
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
-    # grab the raw NumPy array representing the image, then initialize the timestamp
-    # and occupied/unoccupied text
-    image = frame.array
-    image = draw_lines(image)
-    cv2.imshow("Frame", image)
-    key = cv2.waitKey(1)&0xFF
-    # clear the stream in preparation for the next frame
-    rawCapture.truncate(0)
-    # if the `q` key was pressed, break from the loop
-    if key == ord("q"):
-        break
+	# grab the raw NumPy array representing the image, then initialize the timestamp
+	# and occupied/unoccupied text
+	image = frame.array
+	image = draw_lines(image)
+	gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+	kp_grayframe, desc_grayframe = sift.detectAndCompute(gray, None)
+	matches = flann.knnMatch(desc_image, desc_grayframe, k=2)
+	good_points = []
+	for m, n in matches:
+		if(m.distance<0.5*n.distance):good_points.append(m)	
+	image = cv2.drawMatches(h_img, kp_image, gray, kp_grayframe, good_points, gray)
+	cv2.imshow("Frame", image)
+	key = cv2.waitKey(1)&0xFF
+	# clear the stream in preparation for the next frame
+	rawCapture.truncate(0)
+	# if the `q` key was pressed, break from the loop
+	if key == ord("q"):
+		break
 
