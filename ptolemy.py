@@ -4,9 +4,6 @@ from picamera import PiCamera
 import matplotlib.pyplot as plt
 import numpy as np
 from picamera.array import PiRGBArray
-
-
-
     
 
 #line midpoint
@@ -132,6 +129,7 @@ cv2.createTrackbar("L-V","Trackbar",0,180, nothing)
 cv2.createTrackbar("U-H","Trackbar",180,180, nothing)
 cv2.createTrackbar("U-S","Trackbar",255,255, nothing)
 cv2.createTrackbar("U-V","Trackbar",255,255, nothing)
+font = cv2.FONT_HERSHEY_COMPLEX
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
     # grab the raw NumPy array representing the image, then initialize the timestamp
@@ -147,8 +145,20 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     lower_red = np.array([l_h,l_s,l_v])
     upper_red = np.array([u_h,u_s,u_v])
     mask = cv2.inRange(hsv,lower_red,upper_red)
+    kernel = np.ones((5,5),np.uint8)
+    mask = cv2.erode(mask,kernel)
+    #contours
+    A,contours,C = cv2.findContours(mask,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     image = draw_lines(image,scrn_x,scrn_y)
-    #cv2.imshow("Frame", image)
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
+        if area > 400:
+            cv2.drawContours(image,[approx],0,(0,0,0),5)
+        #scene/"shape" detector
+            if len(approx)==4:
+               cv2.putText(image, "rectangle",(10,10),font,1,(0,0,0))
+    cv2.imshow("Frame", image)
     cv2.imshow("Mask",mask)
     key = cv2.waitKey(1)&0xFF
     # clear the stream in preparation for the next frame
