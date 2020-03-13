@@ -123,12 +123,12 @@ time.sleep(0.1)
 scrn_x = int(640*0.5)
 scrn_y = int(480*0.5)
 cv2.namedWindow("Trackbar")
-cv2.createTrackbar("L-H","Trackbar",0,180, nothing)
-cv2.createTrackbar("L-S","Trackbar",0,255, nothing)
-cv2.createTrackbar("L-V","Trackbar",0,180, nothing)
+cv2.createTrackbar("L-H","Trackbar",171,180, nothing)
+cv2.createTrackbar("L-S","Trackbar",78,255, nothing)
+cv2.createTrackbar("L-V","Trackbar",153,180, nothing)
 cv2.createTrackbar("U-H","Trackbar",180,180, nothing)
 cv2.createTrackbar("U-S","Trackbar",255,255, nothing)
-cv2.createTrackbar("U-V","Trackbar",255,255, nothing)
+cv2.createTrackbar("U-V","Trackbar",240,255, nothing)
 font = cv2.FONT_HERSHEY_COMPLEX
 
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
@@ -153,7 +153,7 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     for cnt in contours:
         area = cv2.contourArea(cnt)
         approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
-        if area > 400:
+        if area > 300:
             cv2.drawContours(image,[approx],0,(0,0,0),5)
         #scene/"shape" detector
             if len(approx)==4:
