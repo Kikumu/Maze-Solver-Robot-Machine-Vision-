@@ -123,9 +123,9 @@ time.sleep(0.1)
 scrn_x = int(640*0.5)
 scrn_y = int(480*0.5)
 cv2.namedWindow("Trackbar")
-cv2.createTrackbar("L-H","Trackbar",171,180, nothing)
-cv2.createTrackbar("L-S","Trackbar",78,255, nothing)
-cv2.createTrackbar("L-V","Trackbar",153,180, nothing)
+cv2.createTrackbar("L-H","Trackbar",169,180, nothing)
+cv2.createTrackbar("L-S","Trackbar",105,255, nothing)
+cv2.createTrackbar("L-V","Trackbar",160,180, nothing)
 cv2.createTrackbar("U-H","Trackbar",180,180, nothing)
 cv2.createTrackbar("U-S","Trackbar",255,255, nothing)
 cv2.createTrackbar("U-V","Trackbar",240,255, nothing)
@@ -152,8 +152,8 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image = draw_lines(image,scrn_x,scrn_y)
     for cnt in contours:
         area = cv2.contourArea(cnt)
-        approx = cv2.approxPolyDP(cnt, 0.01*cv2.arcLength(cnt,True),True)
-        if area > 300:
+        approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt,True),True)
+        if area > 400:
             cv2.drawContours(image,[approx],0,(0,0,0),5)
         #scene/"shape" detector
             if len(approx)==4:
