@@ -57,6 +57,42 @@ def subtract_x_axis(var2,var4,var):
 	result = var4-var2
 	return result,var
 	
+def hsv_color_space(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    l_h = cv2.getTrackbarPos("L-H","Trackbar")
+    l_s = cv2.getTrackbarPos("L-S","Trackbar")
+    l_v = cv2.getTrackbarPos("L-V","Trackbar")
+    u_h = cv2.getTrackbarPos("U-H","Trackbar")
+    u_s = cv2.getTrackbarPos("U-S","Trackbar")
+    u_v = cv2.getTrackbarPos("U-V","Trackbar")
+    lower_red = np.array([l_h,l_s,l_v])
+    upper_red = np.array([u_h,u_s,u_v])
+    mask = cv2.inRange(hsv,lower_red,upper_red)
+    kernel = np.ones((5,5),np.uint8)
+    mask = cv2.erode(mask,kernel)
+    #contours
+    A,contours,C = cv2.findContours(mask,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    image = draw_lines(image,scrn_x,scrn_y)
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt,True),True)
+        if area > 400:
+          cv2.drawContours(image,[approx],0,(0,0,0),5)
+            #scene/"shape" detector
+          if(len(approx)==4):
+            cv2.putText(image, "rectangle",(10,10),font,1,(0,0,0))
+          elif(len(approx)==3):
+            cv2.putText(image, "triangle",(10,10),font,1,(0,0,0))
+          elif(len(approx)==10):
+            cv2.putText(image, "10sides",(10,10),font,1,(0,0,0))
+          elif(len(approx)==5):
+            cv2.putText(image, "5sides",(10,10),font,1,(0,0,0))
+          elif(len(approx)==7):
+            cv2.putText(image, "7sven",(10,10),font,1,(0,0,0))
+          elif(len(approx)==8):
+            cv2.putText(image, "ate",(10,10),font,1,(0,0,0))
+    return image,mask
+	
 
 def longest_line(var1,var2,var3,var4):
 	line_length =  ((var1 - var3)**2 + (var2 - var4)**2)**1/2
@@ -113,6 +149,8 @@ def draw_lines(img,mid_x,mid_y):
 
 def nothing(X):
 	pass
+	
+
 #template setup
 camera = PiCamera()
 camera.resolution = (640,480)
@@ -135,39 +173,10 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     # grab the raw NumPy array representing the image, then initialize the timestamp
     # and occupied/unoccupied text
     image = frame.array
-    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-    l_h = cv2.getTrackbarPos("L-H","Trackbar")
-    l_s = cv2.getTrackbarPos("L-S","Trackbar")
-    l_v = cv2.getTrackbarPos("L-V","Trackbar")
-    u_h = cv2.getTrackbarPos("U-H","Trackbar")
-    u_s = cv2.getTrackbarPos("U-S","Trackbar")
-    u_v = cv2.getTrackbarPos("U-V","Trackbar")
-    lower_red = np.array([l_h,l_s,l_v])
-    upper_red = np.array([u_h,u_s,u_v])
-    mask = cv2.inRange(hsv,lower_red,upper_red)
-    kernel = np.ones((5,5),np.uint8)
-    mask = cv2.erode(mask,kernel)
-    #contours
-    A,contours,C = cv2.findContours(mask,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    #---------------------------------DRAW LINES-----------------------------------------------
     image = draw_lines(image,scrn_x,scrn_y)
-    for cnt in contours:
-        area = cv2.contourArea(cnt)
-        approx = cv2.approxPolyDP(cnt, 0.02*cv2.arcLength(cnt,True),True)
-        if area > 400:
-          cv2.drawContours(image,[approx],0,(0,0,0),5)
-            #scene/"shape" detector
-          if(len(approx)==4):
-            cv2.putText(image, "rectangle",(10,10),font,1,(0,0,0))
-          elif(len(approx)==3):
-            cv2.putText(image, "triangle",(10,10),font,1,(0,0,0))
-          elif(len(approx)==10):
-            cv2.putText(image, "10sides",(10,10),font,1,(0,0,0))
-          elif(len(approx)==5):
-            cv2.putText(image, "5sides",(10,10),font,1,(0,0,0))
-          elif(len(approx)==7):
-            cv2.putText(image, "7sven",(10,10),font,1,(0,0,0))
-          elif(len(approx)==8):
-            cv2.putText(image, "ate",(10,10),font,1,(0,0,0))
+    #---------------------------------COLOR SPACE AND SHAPE DETECTION---------------------------
+    image,mask = hsv_color_space(image)
     cv2.imshow("Frame", image)
     cv2.imshow("Mask",mask)
     key = cv2.waitKey(1)&0xFF
