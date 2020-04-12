@@ -9,38 +9,85 @@
 
 
 #include "simpletools.h"                      // simpletools library
-#include "abdrive360.h"                          // abdrive library
+#include "abdrive.h"                          // abdrive library
 #include "adcDCpropab.h" 
 
+int distLeft[4], distRight[4];
 int main()                   
 {
-  //left
-  //stop
-  //turn around(180)
-  //forward
-  //distance monitor?
- //drive_speed(64, 64);                       // Forward 64 tps for 2 s
-// pause(2000);
- //drive_speed(0, 0);
-// drive_speed(26, 0);                        // Turn 26 tps for 1 s
-// pause(1000);
-// drive_speed(0, 0);
-// drive_speed(128, 128);                     // Forward 128 tps for 1 s
-// pause(1000);
-// drive_speed(0, 0);
-// freqout(10, 1000, 3000);  
-// pause(1000);
-
- int var = 5;
- adc_init(21, 20, 19, 18); 
- float v1,v2;
-  ////int buzzer = output(10);
-  //dac_ctr(2, 0, 194);
+//adc_init(21, 20, 19, 18); 
+int var = 5;
+//float v1,v2,v3,v0,turn_around
+int v1,v2,v3,v0,turn_around,status;
+drive_getTicks(&distLeft[0], &distRight[0]);
+print("distLeft[0] = %d, distRight[0] = %d\n", distLeft[0], distRight[0]);
+int count = 0;
+//--------------------------------------loop-----------------------------------------------//
  while (var < 7){
- float cam_data = input(11);
- v1 = adc_volts(3);
- v2 = adc_volts(2);
- print("A/D3 = %f V%c\n", v2, CLREOL);     // Display volts
-  pause(1000);
+//v3 = adc_volts(3);  //left 26
+//v2 = adc_volts(2);  //right 20
+//v1 = adc_volts(1);  //forward 16
+//v0 = adc_volts(0);  //turn around 21
+turn_around = input(10);
+v1 = input(1);
+v2 = input(0);
+v3 = input(2);
+
+if(v1 >= 0){ //16
+//forward movement
+    switch(v1)
+   {
+     case 1:
+      drive_speed(25, 25);
+      status = 1;
+      break;
+     case 0:
+      drive_speed(0, 0);
+      status = 0;
+      break;      
+   }                    
+  }
+else if(turn_around >= 0){ //21
+//360 movement
+ switch(turn_around){
+   case 1:
+    if(status==0){
+      drive_speed(45, 0);                       
+      drive_speed(0, -45);
+      }     
+      break;
+   case 0:
+    if(status == 1){drive_speed(25, 25);}
+    break;
+   }
+}
+else if(v2 >= 0){ //20
+//left
+   switch(v2)
+   {
+     case 1:
+      drive_speed(25, 0);
+      break;
+     case 0:
+      if (status == 1){drive_speed(25, 25);}
+      else if(status == 0){drive_speed(0, 0);}
+      break;      
+   }                        
+ } 
+else if(v3 >= 0){ //26
+//right
+    switch(v3)
+   {
+     case 1:
+      drive_speed(0, 25);
+      break;
+     case 0:
+      if (status == 1){drive_speed(25, 25);}
+      else if(status == 0){drive_speed(0, 0);}
+      break;      
+   }                   
+} 
+//---------------remaining code is to turn 90 so that it can keep 'one hand on wall'
+//print("A/D3 = %f V%c\n", turn_around, CLREOL);     // Display volts
  }    
 }
