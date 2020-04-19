@@ -22,7 +22,7 @@ int main()
   int var = 5;
   
   while(var < 7){
-     drive_speed(64, 64);                       // Forward 64 tps for 2 s
+  drive_speed(64, 64);                       // Forward 64 tps for 2 s
   pause(2000);
   drive_speed(0, 0);
 
