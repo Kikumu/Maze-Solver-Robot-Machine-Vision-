@@ -10,7 +10,8 @@ GPIO.setmode(GPIO.BCM) #easiest numbering 1,2,3,4...
 GPIO.setup(6,GPIO.OUT) #adjust left
 GPIO.setup(13,GPIO.OUT) #adjust right
 GPIO.setup(26,GPIO.OUT) #forward
-
+GPIO.setup(16,GPIO.OUT) #l
+GPIO.setup(20,GPIO.OUT)
 def hsv_color_space(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     l_h = cv2.getTrackbarPos("L-H","Trackbar")
@@ -107,12 +108,14 @@ def sensor_calib(mask):
     print("right",pixel1)
     print("right1",pixel1f1)
     print("right2",pixel1f2)
+    print("most right",pixel1f4)
     print("left",pixel2)
     print("left1",pixel2f1)
     print("left2",pixel2f2)
     v = forward_signal(pixelcnt)
     left_signal(pixel2)
     right_signal(pixel1)
+    furthest_right_signal(pixel1f4)
     print("pin state",v)
     if pixelcnt > 0:
        print("move forward")
@@ -177,10 +180,12 @@ def further_right_signal(pixel_value):
 		
 def furthest_right_signal(pixel_value):
     if pixel_value > 0:#(pixel intensity high)
-        GPIO.output(26,1)#pin high
+        GPIO.output(16,1)#pin high
+        print("furthest right high",1)
+        #time.sleep(0.5)
     elif pixel_value < 255:#(pixel intensity low)
-        GPIO.output(26,0)
-		
+        GPIO.output(16,0)
+        print("furthest right low",0)
 
 #-------------------------------------------------------------------------------------------------------#
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
