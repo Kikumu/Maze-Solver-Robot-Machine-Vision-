@@ -39,6 +39,12 @@ if (v3 > 0)
   drive_ramp(0,52);
   pause(1000);
 }
+if (v4 > 0){
+  drive_ramp(0,52);
+  pause(200);
+  drive_ramp(-52,0);
+  pause(200);
+}
 
 //turn left 45
 //if (v4 > 0)
