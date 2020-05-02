@@ -4,47 +4,48 @@
 
 int main()                   
 {
-adc_init(21, 20, 19, 18); 
 int var = 5;
-float v0,v1,v2,v3,turn_around,status;
+float v0,v1,v2,v3,v4,turn_around,status;
 //26,13,5
 //--------------------------------------loop-----------------------------------------------//
  while (var < 7){
-turn_around = input(10);
-//v2 = input(1);
-//v1 = adc_volts(2);
-//v0=  adc_volts(1);
 v0 = input(0);//26
 v1 = input(1);//13
 v2 = input(2);//5(6 for the model b pi3)
+v3 = input(3);//16
+v4 = input(4);//20
 //forward
 if(v0 > 0){
-  drive_speed(25, 25);
+  drive_ramp(25, 25);
   }
 else if(v0 < 1){
-  drive_speed(0, 0);
+  drive_ramp(0, 0);
 }
  
 //adjust left
 if(v1 > 0){
-    drive_speed(25, 0);
+    drive_ramp(15, 0);
 }
-//else if(v1 < 1){
-//  drive_speed(0, 0);
-//}  
-
-
 //adjust right
 if(v2 > 0)
 {
-  drive_speed(0, 25);
+  drive_ramp(0, 15);
 } 
-//else if(v2 < 1)
+//turn right 45
+if (v3 > 0)
+{
+  drive_ramp(25,25);
+  pause(200);
+  drive_ramp(0,52);
+  pause(1000);
+}
+
+//turn left 45
+//if (v4 > 0)
 //{
-//   drive_speed(0, 0);
-//}  
- 
-//print("A/D3 = %f V%c\n", v2, CLREOL);     // Display volts
+//  drive_speed(52,0);
+//}
+//print("A/D3 = %f V%c\n", v3, CLREOL);     // Display volts
 //pause(1000);
  }    
 }
