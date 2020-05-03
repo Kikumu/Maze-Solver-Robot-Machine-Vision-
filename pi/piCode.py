@@ -6,12 +6,15 @@ import numpy as np
 from picamera.array import PiRGBArray
 import RPi.GPIO as GPIO
 
-GPIO.setmode(GPIO.BCM) #easiest numbering 1,2,3,4...    
-GPIO.setup(6,GPIO.OUT) #adjust left
+
+GPIO.setmode(GPIO.BCM)  #easiest numbering 1,2,3,4...    
+GPIO.setup(6,GPIO.OUT)  #adjust left
 GPIO.setup(13,GPIO.OUT) #adjust right
 GPIO.setup(26,GPIO.OUT) #forward
-GPIO.setup(16,GPIO.OUT) #l
-GPIO.setup(20,GPIO.OUT)
+GPIO.setup(16,GPIO.OUT) #turn left completely
+GPIO.setup(20,GPIO.OUT) #turn round signal
+GPIO.setup(12,GPIO.IN)  #check if board has another "turning" task
+
 def hsv_color_space(image):
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     l_h = cv2.getTrackbarPos("L-H","Trackbar")
@@ -99,6 +102,8 @@ def sensor_calib(mask):
     pixel1f2=mask[420,490]#furthest right
     pixel1f3=mask[420,520]#turn most right
     pixel1f4=mask[420,550]
+    pixel1f5=mask[420,587]
+    pixel1f6=mask[420,605]
     pixel2=mask[420,197]#287,420(left)
     pixel2f1=mask[420,167] #furtherleft
     pixel2f2=mask[420,137]#furthestleft
@@ -112,10 +117,15 @@ def sensor_calib(mask):
     print("left",pixel2)
     print("left1",pixel2f1)
     print("left2",pixel2f2)
-    v = forward_signal(pixelcnt)
-    left_signal(pixel2)
-    right_signal(pixel1)
-    furthest_right_signal(pixel1f4)
+    v = forward_signal(pixelcnt)#v1
+    left_signal(pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4)
+    right_signal(pixel1,pixel1f5,pixel1f2,pixel1f4,pixel1f3)
+    turn_signal = furthest_right_signal(pixel1f6) # 1 for i need to turn and zero for i dont need to turn
+    job_flag = GPIO.input(12) # 1 theres a job 0 theres no job
+    print("job_flag",job_flag)
+    trn = turn_around(pixelcnt,pixel1,pixel1f1,pixel1f2,pixel1f3,pixel1f4,pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4,turn_signal,job_flag)#only turn for when i dont need to turn and all sensors are dulled
+    
+    print("turn around state",turn_signal)
     print("pin state",v)
     if pixelcnt > 0:
        print("move forward")
@@ -132,6 +142,8 @@ def sensor_calib(mask):
     mask = cv2.circle(mask,(490,420),5,(100,50,255),0)#farthest right dot
     mask = cv2.circle(mask,(520,420),5,(100,50,255),0)#furthest left dot
     mask = cv2.circle(mask,(550,420),5,(100,50,255),0)#turn left dot
+    mask = cv2.circle(mask,(587,420),5,(100,50,255),0)#turn left dot
+    mask = cv2.circle(mask,(605,420),5,(100,50,255),0)#turn left dot
     mask = cv2.circle(mask,(197,420),5,(100,50,255),0)#left dot
     mask = cv2.circle(mask,(167,420),5,(100,50,255),0)#further left  dot
     mask = cv2.circle(mask,(137,420),5,(100,50,255),0)#furthest left dot
@@ -141,6 +153,7 @@ def sensor_calib(mask):
 
 def forward_signal(pixel_value):
     if pixel_value > 0:#(pixel intensity high)
+        GPIO.output(20,0) #disable turn around
         v=1
         GPIO.output(26,1)#pin high
     elif pixel_value < 255:#(pixel intensity low)
@@ -148,11 +161,15 @@ def forward_signal(pixel_value):
         GPIO.output(26,0)
     return v
 
-def left_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
+def left_signal(pixel_value,pixel_value1,pixel_value2,pixel_value3,pixel_value4):
+    if ((pixel_value > 0) or (pixel_value1 > 0) or (pixel_value2 > 0) or (pixel_value3 > 0) or (pixel_value4 > 0)):#(pixel intensity high)
+        GPIO.output(20,0)#disable turn around
         GPIO.output(13,1)#pin high
+        v=1
     elif pixel_value < 255:#(pixel intensity low)
         GPIO.output(13,0)
+        v=0
+    return v
 		
 def further_left_signal(pixel_value):
     if pixel_value > 0:#(pixel intensity high)
@@ -166,26 +183,41 @@ def farthest_left_signal(pixel_value):
     elif pixel_value < 255:#(pixel intensity low)
         GPIO.output(26,0)
 
-def right_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
+def right_signal(pixel_value,pixel_value1,pixel_value2,pixel_value3,pixel_value4):
+    if ((pixel_value > 0) or (pixel_value1 > 0)or(pixel_value2 > 0)or(pixel_value3 > 0)or(pixel_value4 > 0)):#(pixel intensity high)
         GPIO.output(6,1)#pin high
+        GPIO.output(20,0)#disable turn around
+        v = 1
     elif pixel_value < 255:#(pixel intensity low)
         GPIO.output(6,0)
+        v = 0
+    return v
 		
-def further_right_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
-        GPIO.output(26,1)#pin high
-    elif pixel_value < 255:#(pixel intensity low)
-        GPIO.output(26,0)
+#def further_right_signal(pixel_value,right,forward):
+ #   if ((pixel_value > 0) and (right==0) and (forward==0)):#(pixel intensity high)
+ #       GPIO.output(26,1)#pin high
+ #   elif pixel_value < 255:#(pixel intensity low)
+ #       GPIO.output(26,0)
 		
 def furthest_right_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
+    if ((pixel_value > 0)):#(pixel intensity high)
         GPIO.output(16,1)#pin high
         print("furthest right high",1)
+        v=1
         #time.sleep(0.5)
     elif pixel_value < 255:#(pixel intensity low)
         GPIO.output(16,0)
         print("furthest right low",0)
+        v=0
+    return v
+        
+def turn_around(one,two,three,four,five,six,seven,eight,nine,ten,eleven,turn, job_flag):
+    GPIO.output(20,0)
+    v=0
+    if (one==0 and two==0 and three==0 and four==0 and five==0 and six==0 and seven==0 and eight==0 and nine==0 and ten==0 and eleven == 0 and turn==0 and job_flag==0): #is okay...but...should give "space" for other function
+        v=1
+        GPIO.output(20,1)
+    return v
 
 #-------------------------------------------------------------------------------------------------------#
 for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
