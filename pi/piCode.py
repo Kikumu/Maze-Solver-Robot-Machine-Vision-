@@ -13,6 +13,7 @@ GPIO.setup(13,GPIO.OUT) #adjust right
 GPIO.setup(26,GPIO.OUT) #forward
 GPIO.setup(16,GPIO.OUT) #turn left completely
 GPIO.setup(20,GPIO.OUT) #turn round signal
+GPIO.setup(23,GPIO.OUT) #turn left
 GPIO.setup(12,GPIO.IN)  #check if board has another "turning" task
 
 def hsv_color_space(image):
@@ -109,6 +110,7 @@ def sensor_calib(mask):
     pixel2f2=mask[420,137]#furthestleft
     pixel2f3=mask[420,107]#turn most left
     pixel2f4=mask[420,77]
+    pixel2f5=mask[420,25]
     print("forward",pixelcnt)
     print("right",pixel1)
     print("right1",pixel1f1)
@@ -117,15 +119,18 @@ def sensor_calib(mask):
     print("left",pixel2)
     print("left1",pixel2f1)
     print("left2",pixel2f2)
+    print("most left", pixel2f5)
     v = forward_signal(pixelcnt)#v1
     left_signal(pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4)
     right_signal(pixel1,pixel1f5,pixel1f2,pixel1f4,pixel1f3)
     turn_signal = furthest_right_signal(pixel1f6) # 1 for i need to turn and zero for i dont need to turn
+    turn_left_signal = furthest_left_signal(pixel2f5,turn_signal)
+    print("turn left 90?", turn_left_signal)
     job_flag = GPIO.input(12) # 1 theres a job 0 theres no job
     print("job_flag",job_flag)
-    trn = turn_around(pixelcnt,pixel1,pixel1f1,pixel1f2,pixel1f3,pixel1f4,pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4,turn_signal,job_flag)#only turn for when i dont need to turn and all sensors are dulled
-    
-    print("turn around state",turn_signal)
+    trn = turn_around(pixelcnt,pixel1,pixel1f1,pixel1f2,pixel1f3,pixel1f4,pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4,pixel2f5,turn_signal,job_flag)#only turn for when i dont need to turn and all sensors are dulled
+    print("turn around?",trn)
+    print("Right hand rule?",turn_signal)
     print("pin state",v)
     if pixelcnt > 0:
        print("move forward")
@@ -149,6 +154,7 @@ def sensor_calib(mask):
     mask = cv2.circle(mask,(137,420),5,(100,50,255),0)#furthest left dot
     mask = cv2.circle(mask,(107,420),5,(100,50,255),0)#turn left dot
     mask = cv2.circle(mask,(77,420),5,(100,50,255),0)#turn left dot
+    mask = cv2.circle(mask,(25,420),5,(100,50,255),0)#turn left dot
     return mask	   
 
 def forward_signal(pixel_value):
@@ -170,18 +176,6 @@ def left_signal(pixel_value,pixel_value1,pixel_value2,pixel_value3,pixel_value4)
         GPIO.output(13,0)
         v=0
     return v
-		
-def further_left_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
-        GPIO.output(26,1)#pin high
-    elif pixel_value < 255:#(pixel intensity low)
-        GPIO.output(26,0)
-		
-def farthest_left_signal(pixel_value):
-    if pixel_value > 0:#(pixel intensity high)
-        GPIO.output(26,1)#pin high
-    elif pixel_value < 255:#(pixel intensity low)
-        GPIO.output(26,0)
 
 def right_signal(pixel_value,pixel_value1,pixel_value2,pixel_value3,pixel_value4):
     if ((pixel_value > 0) or (pixel_value1 > 0)or(pixel_value2 > 0)or(pixel_value3 > 0)or(pixel_value4 > 0)):#(pixel intensity high)
@@ -192,12 +186,6 @@ def right_signal(pixel_value,pixel_value1,pixel_value2,pixel_value3,pixel_value4
         GPIO.output(6,0)
         v = 0
     return v
-		
-#def further_right_signal(pixel_value,right,forward):
- #   if ((pixel_value > 0) and (right==0) and (forward==0)):#(pixel intensity high)
- #       GPIO.output(26,1)#pin high
- #   elif pixel_value < 255:#(pixel intensity low)
- #       GPIO.output(26,0)
 		
 def furthest_right_signal(pixel_value):
     if ((pixel_value > 0)):#(pixel intensity high)
@@ -210,11 +198,20 @@ def furthest_right_signal(pixel_value):
         print("furthest right low",0)
         v=0
     return v
+
+def furthest_left_signal(pixel_data,right_status):
+    if((pixel_data > 0) and (right_status==0)):
+       GPIO.output(23,1)
+       v = 1
+    elif((pixel_data < 255) or (right_status==1)):
+       GPIO.output(23,0)
+       v = 0
+    return v
         
-def turn_around(one,two,three,four,five,six,seven,eight,nine,ten,eleven,turn, job_flag):
+def turn_around(one,two,three,four,five,six,seven,eight,nine,ten,eleven,twelve,turn,job_flag):
     GPIO.output(20,0)
     v=0
-    if (one==0 and two==0 and three==0 and four==0 and five==0 and six==0 and seven==0 and eight==0 and nine==0 and ten==0 and eleven == 0 and turn==0 and job_flag==0): #is okay...but...should give "space" for other function
+    if (one==0 and two==0 and three==0 and four==0 and five==0 and six==0 and seven==0 and eight==0 and nine==0 and ten==0 and eleven == 0 and turn==0 and twelve == 0 and job_flag==0): #is okay...but...should give "space" for other function
         v=1
         GPIO.output(20,1)
     return v
