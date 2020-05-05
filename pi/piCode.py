@@ -111,6 +111,7 @@ def sensor_calib(mask):
     pixel2f3=mask[420,107]#turn most left
     pixel2f4=mask[420,77]
     pixel2f5=mask[420,25]
+    horizon=mask[343,318]
     print("forward",pixelcnt)
     print("right",pixel1)
     print("right1",pixel1f1)
@@ -124,7 +125,7 @@ def sensor_calib(mask):
     left_signal(pixel2,pixel2f1,pixel2f2,pixel2f3,pixel2f4)
     right_signal(pixel1,pixel1f5,pixel1f2,pixel1f4,pixel1f3)
     turn_signal = furthest_right_signal(pixel1f6) # 1 for i need to turn and zero for i dont need to turn
-    turn_left_signal = furthest_left_signal(pixel2f5,turn_signal)
+    turn_left_signal = furthest_left_signal(pixel2f5,turn_signal,horizon)
     print("turn left 90?", turn_left_signal)
     job_flag = GPIO.input(12) # 1 theres a job 0 theres no job
     print("job_flag",job_flag)
@@ -155,6 +156,7 @@ def sensor_calib(mask):
     mask = cv2.circle(mask,(107,420),5,(100,50,255),0)#turn left dot
     mask = cv2.circle(mask,(77,420),5,(100,50,255),0)#turn left dot
     mask = cv2.circle(mask,(25,420),5,(100,50,255),0)#turn left dot
+    mask = cv2.circle(mask,(318,343),5,(100,50,255),0)#turn left dot
     return mask	   
 
 def forward_signal(pixel_value):
@@ -199,8 +201,10 @@ def furthest_right_signal(pixel_value):
         v=0
     return v
 
-def furthest_left_signal(pixel_data,right_status):
-    if((pixel_data > 0) and (right_status==0)):
+def furthest_left_signal(pixel_data,right_status,horizon):
+    v=0
+    GPIO.output(23,0)
+    if((pixel_data > 0) and (right_status==0) and horizon < 255):
        GPIO.output(23,1)
        v = 1
     elif((pixel_data < 255) or (right_status==1)):
