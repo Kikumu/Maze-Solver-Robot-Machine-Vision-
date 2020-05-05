@@ -5,7 +5,7 @@
 int main()                   
 {
 int var = 5;
-float v0,v1,v2,v3,v4,turn_around,status;
+float v0,v1,v2,v3,v4,v7;
 //26,13,5
 //--------------------------------------loop-----------------------------------------------//
  while (var < 7){
@@ -14,6 +14,9 @@ v1 = input(1);//13
 v2 = input(2);//5(6 for the model b pi3)
 v3 = input(3);//16
 v4 = input(4);//20
+v7 = input(7);//23
+//pin(5) 12 is input
+
 //forward
 if(v0 > 0){
   high(5);
@@ -45,7 +48,18 @@ if (v3 > 0)
   drive_ramp(0,0);
   pause(1000);
 }
+//turn left 45
+if (v7 > 0){
+  high(5);
+  drive_ramp(25,25);
+  pause(300);
+  drive_ramp(54,0); //52
+  pause(1000);
+  drive_ramp(0,0);
+  pause(1000); 
+}  
 
+//turn around
 v4 = input(4);//20(check input status due to pause)
 if ((v4 > 0)&&(v0 < 1)&&(v2 < 1)){
  drive_ramp(0,52);
@@ -57,7 +71,7 @@ if ((v4 > 0)&&(v0 < 1)&&(v2 < 1)){
  low(5);
 }
 //high(5);
-//print("A/D3 = %f V%c\n", v3, CLREOL);     // Display volts
+//print("A/D3 = %f V%c\n", v7, CLREOL);     // Display volts
 //pause(1000);
 //low(5);
 //pause(1000);
