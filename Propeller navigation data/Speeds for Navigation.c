@@ -20,7 +20,7 @@ v7 = input(7);//23
 //forward
 if(v0 > 0){
   high(5);
-  drive_ramp(25, 25);
+  drive_ramp(30, 30);
   }
 else if(v0 < 1){
   low(5);
@@ -45,10 +45,11 @@ if (v3 > 0)
 {
   high(5);//12
   drive_ramp(25,25);
-  pause(200);
-  drive_ramp(0,56); //52
+  pause(400);
+  drive_speed(0,0);
+  drive_speed(0,50); //52
   pause(1000);
-  drive_ramp(0,0);
+  drive_speed(0,0);
   pause(1000);
 }
 v7 = input(7);
@@ -56,21 +57,22 @@ v7 = input(7);
 if (v7 > 0){
   high(5);
   drive_ramp(25,25);
-  pause(200);
-  drive_ramp(54,0); //52
+  pause(400);
+  drive_speed(0,0);
+  drive_speed(50,0); //52
   pause(1000);
-  drive_ramp(0,0);
+  drive_speed(0,0);
   pause(1000); 
 }  
 
 //turn around
 v4 = input(4);//20(check input status due to pause)
 if ((v4 > 0)&&(v0 < 1)&&(v2 < 1)){
- drive_ramp(0,52);
+ drive_speed(0,52);
  pause(1000);
- drive_ramp(-52,0);
+ drive_speed(-52,0);
  pause(1000);
- drive_ramp(0,0);
+ drive_speed(0,0);
  pause(1000);
  low(5);
 }
