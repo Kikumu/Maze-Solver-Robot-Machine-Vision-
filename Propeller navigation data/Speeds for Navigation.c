@@ -27,32 +27,36 @@ else if(v0 < 1){
   drive_ramp(0, 0);
 }
 //adjust left
+v1 = input(1);
 if(v1 > 0){
     high(5);
     drive_ramp(15, 0);
 }
 //adjust right
+v2 = input(2);
 if(v2 > 0)
 {
   high(5);
   drive_ramp(0, 15);
 } 
 //turn right 45
+v3 = input(3);
 if (v3 > 0)
 {
   high(5);//12
   drive_ramp(25,25);
-  pause(300);
-  drive_ramp(0,54); //52
+  pause(200);
+  drive_ramp(0,56); //52
   pause(1000);
   drive_ramp(0,0);
   pause(1000);
 }
+v7 = input(7);
 //turn left 45
 if (v7 > 0){
   high(5);
   drive_ramp(25,25);
-  pause(300);
+  pause(200);
   drive_ramp(54,0); //52
   pause(1000);
   drive_ramp(0,0);
