@@ -10,4 +10,4 @@
  5) 5 triple A batteries to power the activity bot.
  6) A power source for the raspberry pi.
  7) Wi-Fi adaptor for the raspberry pi (optional).
- 8) Some tape.
+ 8) Some tape of any colour(Bright coloured tape highly recommended like yellow/red...).
