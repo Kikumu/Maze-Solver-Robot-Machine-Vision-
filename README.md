@@ -7,7 +7,7 @@
  2) Parallax activity board.
  3) 6 1K resistors.
  4) 12 jumper cables.
- 5) 5 triple A batteries to power the activit bot.
+ 5) 5 triple A batteries to power the activity bot.
  6) A power source for the raspberry pi.
  7) Wi-Fi adaptor for the raspberry pi (optional).
  8) Some tape.
