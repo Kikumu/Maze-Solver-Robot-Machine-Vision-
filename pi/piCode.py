@@ -24,14 +24,23 @@ def hsv_color_space(image):
     u_h = cv2.getTrackbarPos("U-H","Trackbar")
     u_s = cv2.getTrackbarPos("U-S","Trackbar")
     u_v = cv2.getTrackbarPos("U-V","Trackbar")
-    lower_red = np.array([l_h,l_s,l_v])
-    upper_red = np.array([u_h,u_s,u_v])
-    mask = cv2.inRange(hsv,lower_red,upper_red)
-    return image,mask
+    lower_color = np.array([l_h,l_s,l_v])
+    upper_color= np.array([u_h,u_s,u_v])
+    mask = cv2.inRange(hsv,lower_color,upper_color)
+    return mask
 	
-def shape_detector(image,mask):
-    kernel = np.ones((5,5),np.uint8)
-    mask = cv2.erode(mask,kernel)
+def shape_detector(image):
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    #mask
+    l_h = cv2.getTrackbarPos("L-H","Shape_Trackbar")
+    l_s = cv2.getTrackbarPos("L-S","Shape_Trackbar")
+    l_v = cv2.getTrackbarPos("L-V","Shape_Trackbar")
+    u_h = cv2.getTrackbarPos("U-H","Shape_Trackbar")
+    u_s = cv2.getTrackbarPos("U-S","Shape_Trackbar")
+    u_v = cv2.getTrackbarPos("U-V","Shape_Trackbar")
+    lower_color = np.array([l_h,l_s,l_v])
+    upper_color = np.array([u_h,u_s,u_v])
+    mask = cv2.inRange(hsv,lower_color,upper_color)
     #contours
     A,contours,C = cv2.findContours(mask,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
     for cnt in contours:
@@ -52,7 +61,7 @@ def shape_detector(image,mask):
             cv2.putText(image, "7sven",(10,10),font,1,(0,0,0))
           elif(len(approx)==8):
             cv2.putText(image, "ate",(10,10),font,1,(0,0,0))
-    return image,mask
+    return mask
 		
 def region_of_interest(width,height):
     vertices = [(0,height),(0,300),(width/2,300),(width,300),(width,height)]
@@ -85,6 +94,8 @@ scrn_y = int((480*0.5) + 200)                 #set y position of centre dot
 left_adjust_dot = scrn_x + 30
 print("y pos", scrn_y) #440
 print("x pos", scrn_x) #320
+
+##---------------------TRACKBAR----------------------------------------------------------
 cv2.namedWindow("Trackbar")
 cv2.createTrackbar("L-H","Trackbar",0,180, nothing)
 cv2.createTrackbar("L-S","Trackbar",145,255, nothing)
@@ -93,8 +104,20 @@ cv2.createTrackbar("U-H","Trackbar",180,180, nothing)
 cv2.createTrackbar("U-S","Trackbar",255,255, nothing)
 cv2.createTrackbar("U-V","Trackbar",255,255, nothing)
 font = cv2.FONT_HERSHEY_COMPLEX
-#low_yellow = np.array([0,68,154])
- #   up_yellow = np.array([180,255,243])
+
+##-------------------SHAPE TRACKBAR----------------------------------------------------
+
+cv2.namedWindow("Shape_Trackbar")
+cv2.createTrackbar("L-H","Shape_Trackbar",0,180, nothing)
+cv2.createTrackbar("L-S","Shape_Trackbar",145,255, nothing)
+cv2.createTrackbar("L-V","Shape_Trackbar",74,180, nothing)
+cv2.createTrackbar("U-H","Shape_Trackbar",180,180, nothing)
+cv2.createTrackbar("U-S","Shape_Trackbar",255,255, nothing)
+cv2.createTrackbar("U-V","Shape_Trackbar",255,255, nothing)
+font = cv2.FONT_HERSHEY_COMPLEX
+
+
+
 
 def sensor_calib(mask):
     pixelcnt= mask[420,320] #420
@@ -227,10 +250,12 @@ for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=
     image = frame.array
     #---------------------------------LINES----------------------------------------------------------------------
     #---------------------------------SHAPE-----------------------------------------------------------------------
-    image,mask = hsv_color_space(image) # shape
+    mask = hsv_color_space(image) # shape
+    shape_mask = shape_detector(image)
     #cv2.imshow("Frame", image)
-    mask = sensor_calib(mask)
+    mask = sensor_calib(shape_mask)
     cv2.imshow("Mask",mask)
+    cv2.imshow("coloured image",image)
     key = cv2.waitKey(1)&0xFF
     rawCapture.truncate(0)
     # if the `q` key was pressed, break from the loop
