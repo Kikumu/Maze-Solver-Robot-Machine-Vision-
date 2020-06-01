@@ -46,9 +46,9 @@ if (v3 > 0)
 {
   high(5);//12
   drive_speed(30,30);
-  pause(980);
+  pause(1000);
   drive_ramp(-64,64); //52
-  pause(420);
+  pause(300);
   drive_speed(0,0);
   pause(1000);
 }
@@ -59,7 +59,7 @@ if (v7 > 0){
   drive_speed(30,30);
   pause(980);
   drive_ramp(64,-64);
-  pause(400);
+  pause(300);
   drive_speed(0,0);
   pause(1000); 
 }  
