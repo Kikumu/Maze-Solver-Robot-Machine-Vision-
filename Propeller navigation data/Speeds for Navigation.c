@@ -46,9 +46,9 @@ if (v3 > 0)
 {
   high(5);//12
   drive_speed(30,30);
-  pause(400);
-  drive_ramp(-32,32); //52
-  pause(400);
+  pause(980);
+  drive_ramp(-64,64); //52
+  pause(420);
   drive_speed(0,0);
   pause(1000);
 }
@@ -57,8 +57,8 @@ v7 = input(7);
 if (v7 > 0){
   high(5);
   drive_speed(30,30);
-  pause(400);
-  drive_ramp(32,-32);
+  pause(980);
+  drive_ramp(64,-64);
   pause(400);
   drive_speed(0,0);
   pause(1000); 
