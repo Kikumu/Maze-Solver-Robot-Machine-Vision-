@@ -11,3 +11,5 @@
  6) A power source for the raspberry pi.
  7) Wi-Fi adaptor for the raspberry pi (optional).
  8) Some tape of any colour(Bright coloured tape highly recommended like yellow/red...).
+ 
+ See: https://kikumu.github.io/portfolio/maze.html for more details and video demonstration!
